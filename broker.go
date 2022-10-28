@@ -19,11 +19,8 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 	sign "github.com/aws/aws-sdk-go/aws/signer/v4"
-	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/rcrowley/go-metrics"
 )
 
@@ -1792,22 +1789,7 @@ func getIAMPayload(addr, useragent string, cfg AWSMSKIAMConfig) ([]byte, error) 
 	}
 
 	signer := sign.NewSigner(
-		credentials.NewChainCredentials([]credentials.Provider{
-			&credentials.EnvProvider{},
-			&credentials.StaticProvider{
-				Value: credentials.Value{
-					AccessKeyID:     cfg.AccessKeyID,
-					SecretAccessKey: cfg.SecretAccessKey,
-					SessionToken:    cfg.SessionToken,
-				},
-			},
-			stscreds.NewWebIdentityRoleProviderWithOptions(
-				sts.New(sess),
-				cfg.RoleArn,
-				useragent,
-				stscreds.FetchTokenPath(cfg.WebIdentityTokenFile),
-			),
-		}),
+		sess.Config.Credentials,
 	)
 
 	host, _, err := net.SplitHostPort(addr)
