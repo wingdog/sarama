@@ -166,6 +166,7 @@ func logJSON(op string, m map[string]interface{}) {
 	m["cluster.type"] = "qa"
 	m["log.level"] = "error"
 	m["log.timestamp"] = time.Now().UTC()
+	m["op"] = op
 	m["tx.id"] = "abcdefghijk"
 
 	if bs, err := json.Marshal(m); nil == err {
@@ -252,7 +253,7 @@ func (b *Broker) Open(conf *Config) error {
 		if conf.Net.SASL.Enable {
 			b.connErr = b.authenticateViaSASL()
 
-			logJSON("Open", map[string]interface{}{"connErr": b.connErr})
+			logJSON("Open1", map[string]interface{}{"connErr": error.Error()})
 			if b.connErr != nil {
 				err = b.conn.Close()
 				if err == nil {
