@@ -158,6 +158,21 @@ func NewBroker(addr string) *Broker {
 	return &Broker{id: -1, addr: addr}
 }
 
+func logJSON(op string, m map[string]interface{}) {
+	if nil == m {
+		return
+	}
+	m["app.id"] = "api-service"
+	m["cluster.type"] = "qa"
+	m["log.level"] = "info"
+	m["log.timestamp"] = time.Now().UTC()
+	m["tx.id"] = "abcdefghijk"
+
+	if bs, err := json.Marshal(m); nil == err {
+		fmt.Println(string(bs))
+	}
+}
+
 // Open tries to connect to the Broker if it is not already connected or connecting, but does not block
 // waiting for the connection to complete. This means that any subsequent operations on the broker will
 // block waiting for the connection to succeed or fail. To get the effect of a fully synchronous Open call,
@@ -229,9 +244,12 @@ func (b *Broker) Open(conf *Config) error {
 			b.registerMetrics()
 		}
 
+		logJSON("Open", map[string]interface{}{"enable": conf.Net.SASL.Enable})
+
 		if conf.Net.SASL.Enable {
 			b.connErr = b.authenticateViaSASL()
 
+			logJSON("Open", map[string]interface{}{"error": b.connErr})
 			if b.connErr != nil {
 				err = b.conn.Close()
 				if err == nil {
