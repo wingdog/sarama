@@ -1841,8 +1841,11 @@ func getIAMPayload(addr, useragent string, cfg AWSMSKIAMConfig) ([]byte, error) 
 		cfg.Expiry = 5 * time.Minute
 	}
 
+	logJSON("getIAMPayload1", map[string]interface{}{"action": "start"})
+
 	header, err := signer.Presign(req, nil, "kafka-cluster", cfg.Region, cfg.Expiry, time.Now().UTC())
 	if err != nil {
+		logJSON("getIAMPayload2", map[string]interface{}{"error": err.Error()})
 		return nil, err
 	}
 
@@ -1860,6 +1863,8 @@ func getIAMPayload(addr, useragent string, cfg AWSMSKIAMConfig) ([]byte, error) 
 	for key, vals := range req.URL.Query() {
 		payload[strings.ToLower(key)] = vals[0]
 	}
+
+	logJSON("getIAMPayload3", map[string]interface{}{"action": "end"})
 
 	return json.Marshal(payload)
 }
