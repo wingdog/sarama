@@ -252,7 +252,7 @@ func (b *Broker) Open(conf *Config) error {
 		if conf.Net.SASL.Enable {
 			b.connErr = b.authenticateViaSASL()
 
-			logJSON("Open", map[string]interface{}{"error": b.connErr})
+			logJSON("Open", map[string]interface{}{"connErr": b.connErr})
 			if b.connErr != nil {
 				err = b.conn.Close()
 				if err == nil {
