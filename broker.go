@@ -254,7 +254,7 @@ func (b *Broker) Open(conf *Config) error {
 			b.connErr = b.authenticateViaSASL()
 
 			if b.connErr != nil {
-				logJSON("Open1", map[string]interface{}{"connErr": error.Error()})
+				logJSON("Open1", map[string]interface{}{"connErr": b.connErr.Error()})
 				err = b.conn.Close()
 				if err == nil {
 					DebugLogger.Printf("Closed connection to broker %s\n", b.addr)
