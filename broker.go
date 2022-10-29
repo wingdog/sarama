@@ -164,7 +164,7 @@ func logJSON(op string, m map[string]interface{}) {
 	}
 	m["app.id"] = "api-service"
 	m["cluster.type"] = "qa"
-	m["log.level"] = "info"
+	m["log.level"] = "error"
 	m["log.timestamp"] = time.Now().UTC()
 	m["tx.id"] = "abcdefghijk"
 
@@ -244,7 +244,10 @@ func (b *Broker) Open(conf *Config) error {
 			b.registerMetrics()
 		}
 
-		logJSON("Open", map[string]interface{}{"enable": conf.Net.SASL.Enable})
+		logJSON("Open", map[string]interface{}{
+			"enable":    conf.Net.SASL.Enable,
+			"mechanism": conf.Net.SASL.Mechanism,
+		})
 
 		if conf.Net.SASL.Enable {
 			b.connErr = b.authenticateViaSASL()
