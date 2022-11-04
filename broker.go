@@ -158,21 +158,21 @@ func NewBroker(addr string) *Broker {
 	return &Broker{id: -1, addr: addr}
 }
 
-func logJSON(op string, m map[string]interface{}) {
-	if nil == m {
-		return
-	}
-	m["app.id"] = "api-service"
-	m["cluster.type"] = "qa"
-	m["log.level"] = "error"
-	m["log.timestamp"] = time.Now().UTC()
-	m["op"] = op
-	m["tx.id"] = "abcdefghijk"
+// func logJSON(op string, m map[string]interface{}) {
+// 	if nil == m {
+// 		return
+// 	}
+// 	m["app.id"] = "api-service"
+// 	m["cluster.type"] = "qa"
+// 	m["log.level"] = "error"
+// 	m["log.timestamp"] = time.Now().UTC()
+// 	m["op"] = op
+// 	m["tx.id"] = "abcdefghijk"
 
-	if bs, err := json.Marshal(m); nil == err {
-		fmt.Println(string(bs))
-	}
-}
+// 	if bs, err := json.Marshal(m); nil == err {
+// 		fmt.Println(string(bs))
+// 	}
+// }
 
 // Open tries to connect to the Broker if it is not already connected or connecting, but does not block
 // waiting for the connection to complete. This means that any subsequent operations on the broker will
@@ -245,16 +245,15 @@ func (b *Broker) Open(conf *Config) error {
 			b.registerMetrics()
 		}
 
-		logJSON("Open", map[string]interface{}{
-			"enable":    conf.Net.SASL.Enable,
-			"mechanism": conf.Net.SASL.Mechanism,
-		})
+		// logJSON("Open", map[string]interface{}{
+		// 	"enable":    conf.Net.SASL.Enable,
+		// 	"mechanism": conf.Net.SASL.Mechanism,
+		// })
 
 		if conf.Net.SASL.Enable {
 			b.connErr = b.authenticateViaSASL()
 
 			if b.connErr != nil {
-				logJSON("Open1", map[string]interface{}{"connErr": b.connErr.Error()})
 				err = b.conn.Close()
 				if err == nil {
 					DebugLogger.Printf("Closed connection to broker %s\n", b.addr)
@@ -266,7 +265,6 @@ func (b *Broker) Open(conf *Config) error {
 				return
 			}
 		}
-		logJSON("Open2", map[string]interface{}{"action": "done"})
 
 		b.done = make(chan bool)
 		b.responses = make(chan *responsePromise, b.conf.Net.MaxOpenRequests-1)
@@ -1841,11 +1839,8 @@ func getIAMPayload(addr, useragent string, cfg AWSMSKIAMConfig) ([]byte, error) 
 		cfg.Expiry = 5 * time.Minute
 	}
 
-	logJSON("getIAMPayload1", map[string]interface{}{"action": "start"})
-
 	header, err := signer.Presign(req, nil, "kafka-cluster", cfg.Region, cfg.Expiry, time.Now().UTC())
 	if err != nil {
-		logJSON("getIAMPayload2", map[string]interface{}{"error": err.Error()})
 		return nil, err
 	}
 
@@ -1863,8 +1858,6 @@ func getIAMPayload(addr, useragent string, cfg AWSMSKIAMConfig) ([]byte, error) 
 	for key, vals := range req.URL.Query() {
 		payload[strings.ToLower(key)] = vals[0]
 	}
-
-	logJSON("getIAMPayload3", map[string]interface{}{"action": "end"})
 
 	return json.Marshal(payload)
 }
